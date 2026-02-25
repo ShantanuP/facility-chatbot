@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Facility Manager Assistant | Corrigo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Left Navbar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">◉</span>
+          <span class="logo-text">Facility Hub</span>
+        </div>
+      </div>
+
+      <div class="user-profile">
+        <div class="profile-avatar" id="profileAvatar">FM</div>
+        <div class="profile-info">
+          <span class="profile-name" id="profileName">Facility Manager</span>
+          <span class="profile-role">Corrigo User</span>
+          <span class="connection-status" id="connectionStatus">
+            <span class="status-dot disconnected"></span>
+            <span class="status-text">Not connected</span>
+          </span>
+        </div>
+        <button type="button" class="btn-profile-menu" id="profileMenuBtn" aria-label="Profile menu">⋮</button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <h3 class="nav-section-title">Chat history</h3>
+        <ul class="chat-history-list" id="chatHistoryList">
+          <li class="chat-history-item empty" id="historyEmpty">No conversations yet</li>
+        </ul>
+        <button type="button" class="btn-new-chat" id="newChatBtn">
+          <span class="btn-icon">+</span>
+          New conversation
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <header class="main-header">
+        <h1 class="main-title">Facility Manager Assistant</h1>
+        <p class="main-subtitle">Ask about work orders, assets, locations, and maintenance. Powered by Corrigo.</p>
+      </header>
+
+      <!-- Suggested prompts (above chat) -->
+      <section class="prompts-section">
+        <p class="prompts-label">Try asking:</p>
+        <div class="prompts-row">
+          <button type="button" class="prompt-chip" data-prompt="Show me open work orders from the last 7 days">Show me open work orders from the last 7 days</button>
+          <button type="button" class="prompt-chip" data-prompt="What are the top 5 assets by maintenance cost this month?">Top 5 assets by maintenance cost this month</button>
+          <button type="button" class="prompt-chip" data-prompt="List work orders by status and draw a chart">Work orders by status (with chart)</button>
+        </div>
+      </section>
+
+      <!-- Chat window -->
+      <section class="chat-section">
+        <div class="chat-messages" id="chatMessages">
+          <div class="welcome-block" id="welcomeBlock">
+            <p>Ask a question about your facilities, work orders, assets, or locations. I’ll use Corrigo data when needed and show charts when useful.</p>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <textarea
+            id="chatInput"
+            class="chat-input"
+            placeholder="Ask about work orders, assets, locations..."
+            rows="1"
+          ></textarea>
+          <button type="button" class="btn-send" id="sendBtn" aria-label="Send message">
+            <span class="send-icon">→</span>
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Credentials modal -->
+  <div class="modal-overlay" id="credentialsModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Connect to Corrigo</h2>
+        <button type="button" class="btn-close-modal" id="closeCredentialsBtn" aria-label="Close">×</button>
+      </div>
+      <p class="modal-description">Enter your Corrigo credentials to fetch work orders, assets, and other facility data.</p>
+      <form id="credentialsForm" class="credentials-form">
+        <label>
+          <span>Username / Email</span>
+          <input type="text" id="corrigoUsername" placeholder="your@email.com" required />
+        </label>
+        <label>
+          <span>Password</span>
+          <input type="password" id="corrigoPassword" placeholder="••••••••" required />
+        </label>
+        <label>
+          <span>Region (e.g. US, APAC)</span>
+          <input type="text" id="corrigoRegion" placeholder="US" value="US" />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="cancelCredentialsBtn">Cancel</button>
+          <button type="submit" class="btn-primary">Connect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

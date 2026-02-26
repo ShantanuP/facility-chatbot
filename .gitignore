@@ -23,3 +23,7 @@ npm-debug.log*
 
 # Optional local server
 . serve
+
+# Generated SQLite DB (run corrigo_schema.sql + corrigo_sample_data.sql to recreate)
+data/corrigo.db
+data/*.db

@@ -1,0 +1,8 @@
+{
+  "name": "facility-chatbot",
+  "version": "1.0.0",
+  "description": "Facility Manager Chatbot with Corrigo sample data (no npm dependencies)",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

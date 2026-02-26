@@ -43,7 +43,6 @@
         /list\s+work\s+order/,
       ],
       dataType: 'work_orders',
-      timeRange: true,
     },
     WORK_ORDERS_BY_STATUS: {
       patterns: [
@@ -88,7 +87,21 @@
     for (const [name, config] of Object.entries(INTENTS)) {
       for (const p of config.patterns) {
         if (p.test(lower)) {
-          return { intent: name, ...config };
+          const result = { intent: name, ...config };
+          // Only filter work orders by period if the user asks for one
+          if (config.dataType === 'work_orders') {
+            const lastDaysMatch = lower.match(/last\s+(\d+)\s+days?/);
+            if (lastDaysMatch) {
+              result.timeRange = true;
+              result.lastDays = Math.min(365, parseInt(lastDaysMatch[1], 10) || 7);
+            } else if (/\b(last\s+week|recent|past\s+week|this\s+week)\b/.test(lower)) {
+              result.timeRange = true;
+              result.lastDays = 7;
+            } else {
+              result.timeRange = false;
+            }
+          }
+          return result;
         }
       }
     }
@@ -146,7 +159,6 @@
   }
 
   function connectWithCredentials(username, password, region) {
-    // Simulate successful connection (real app: call Corrigo auth API)
     saveConnection(true);
     try {
       localStorage.setItem(
@@ -157,74 +169,40 @@
     hideCredentialsModal();
   }
 
-  // ----- Simulated Corrigo data (replace with real API calls) -----
-  function fetchCorrigoData(dataType, options = {}) {
+  // ----- Corrigo data: fetch from local API (sample data in corrigo.db) -----
+  const API_BASE = '';
+
+  async function fetchCorrigoData(dataType, options = {}) {
     if (!state.connected) return null;
 
-    const timeRange = options.timeRange ? (options.lastDays || 7) : null;
+    const endpoints = {
+      work_orders: 'work-orders',
+      work_orders_by_status: 'work-orders-by-status',
+      assets_by_cost: 'assets-by-cost',
+      assets: 'assets',
+      locations: 'locations',
+      maintenance: 'maintenance',
+    };
+    const endpoint = endpoints[dataType];
+    if (!endpoint) return null;
 
-    switch (dataType) {
-      case 'work_orders':
-        return {
-          workOrders: [
-            { id: 'WO-1001', title: 'HVAC filter replacement', status: 'Open', priority: 'High', site: 'Building A', created: '2025-02-20' },
-            { id: 'WO-1002', title: 'Light fixture repair - Floor 2', status: 'Open', priority: 'Medium', site: 'Building A', created: '2025-02-21' },
-            { id: 'WO-1003', title: 'Plumbing leak - Restroom', status: 'In Progress', priority: 'High', site: 'Building B', created: '2025-02-22' },
-            { id: 'WO-1004', title: 'Elevator inspection', status: 'Open', priority: 'Medium', site: 'Building B', created: '2025-02-23' },
-            { id: 'WO-1005', title: 'Fire alarm test', status: 'Completed', priority: 'Low', site: 'Building A', created: '2025-02-18' },
-          ].filter((wo) => {
-            if (!timeRange) return true;
-            const d = new Date(wo.created);
-            const cutoff = new Date();
-            cutoff.setDate(cutoff.getDate() - timeRange);
-            return d >= cutoff;
-          }),
-        };
-      case 'work_orders_by_status':
-        return {
-          byStatus: [
-            { status: 'Open', count: 12 },
-            { status: 'In Progress', count: 5 },
-            { status: 'Completed', count: 28 },
-            { status: 'On Hold', count: 2 },
-            { status: 'Cancelled', count: 1 },
-          ],
-        };
-      case 'assets_by_cost':
-        return {
-          assets: [
-            { name: 'HVAC Unit - Building A', cost: 12500, id: 'AST-001' },
-            { name: 'Elevator System - Tower', cost: 8200, id: 'AST-002' },
-            { name: 'Roof - Building B', cost: 6100, id: 'AST-003' },
-            { name: 'Generator', cost: 4800, id: 'AST-004' },
-            { name: 'Chiller Plant', cost: 4200, id: 'AST-005' },
-          ],
-        };
-      case 'assets':
-        return {
-          assets: [
-            { id: 'AST-001', name: 'HVAC Unit - Building A', type: 'HVAC', location: 'Building A' },
-            { id: 'AST-002', name: 'Elevator System - Tower', type: 'Elevator', location: 'Building B' },
-            { id: 'AST-003', name: 'Roof - Building B', type: 'Structure', location: 'Building B' },
-          ],
-        };
-      case 'locations':
-        return {
-          locations: [
-            { id: 'LOC-1', name: 'Building A', address: '100 Main St', workOrderCount: 8 },
-            { id: 'LOC-2', name: 'Building B', address: '200 Oak Ave', workOrderCount: 5 },
-            { id: 'LOC-3', name: 'Warehouse East', address: '150 Industrial Blvd', workOrderCount: 3 },
-          ],
-        };
-      case 'maintenance':
-        return {
-          upcoming: [
-            { asset: 'HVAC Unit - Building A', date: '2025-03-01', type: 'Filter replacement' },
-            { asset: 'Elevator System', date: '2025-03-05', type: 'Annual inspection' },
-          ],
-        };
-      default:
-        return null;
+    let url = API_BASE + '/api/' + endpoint;
+    if (dataType === 'work_orders' && options.timeRange) {
+      const lastDays = options.lastDays || 7;
+      url += '?lastDays=' + encodeURIComponent(lastDays);
+    }
+    if (dataType === 'assets_by_cost') {
+      url += (url.includes('?') ? '&' : '?') + 'limit=10';
+    }
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn('Corrigo API request failed:', err);
+      return null;
     }
   }
 
@@ -446,7 +424,7 @@
   }
 
   // ----- Send user message and get bot response -----
-  function sendMessage() {
+  async function sendMessage() {
     const raw = (elements.chatInput?.value || '').trim();
     if (!raw) return;
 
@@ -457,7 +435,7 @@
     const needsData = needsCorrigoData(intentResult);
 
     if (needsData && !state.connected) {
-      appendMessage('bot', 'To answer that, I need to pull data from the Corrigo application. Please connect with your Corrigo credentials so I can retrieve work orders, assets, or other facility data.', {
+      appendMessage('bot', 'To answer that, I need data from Corrigo. Start the local server to use the sample data: run **npm start** in the project folder, then open **http://localhost:3001**. You can also connect with your Corrigo credentials when you have live access.', {
         followUps: ['Show open work orders', 'Top assets by cost', 'Work orders by status'],
       });
       showCredentialsModal();
@@ -465,11 +443,25 @@
       return;
     }
 
-    const corrigoData = needsData ? fetchCorrigoData(intentResult.dataType, { timeRange: intentResult.timeRange, lastDays: 7 }) : null;
+    const corrigoData = needsData
+      ? await fetchCorrigoData(intentResult.dataType, {
+          timeRange: intentResult.timeRange === true,
+          lastDays: intentResult.lastDays || 7,
+        })
+      : null;
+
+    if (needsData && state.connected && corrigoData == null) {
+      appendMessage('bot', 'The data server did not respond. Make sure the app is running from the server: run **npm start** and open **http://localhost:3001**. The chatbot reads from the sample data in `data/corrigo.db`.', {
+        followUps: ['Show open work orders', 'Work orders by status', 'Top assets by cost'],
+      });
+      saveToHistory(raw);
+      return;
+    }
+
     const response = buildResponse(intentResult, needsData ? corrigoData : {});
 
     if (!response) {
-      appendMessage('bot', 'Connection to Corrigo is required for this question. Please enter your credentials when the dialog appears.', {
+      appendMessage('bot', 'Connection to Corrigo is required for this question. Start the server (npm start) to use sample data, or enter your credentials for live Corrigo.', {
         followUps: ['Show open work orders', 'Top assets by cost'],
       });
       showCredentialsModal();
@@ -602,8 +594,24 @@
     elements.newChatBtn.addEventListener('click', newChat);
   }
 
-  // ----- Init -----
-  loadConnectionState();
-  loadSessions();
-  initCredentialsForm();
+  // ----- Init: auto-connect if sample data API is available -----
+  (async function tryDataServer() {
+    loadConnectionState();
+    if (state.connected) {
+      loadSessions();
+      initCredentialsForm();
+      return;
+    }
+    try {
+      const res = await fetch(API_BASE + '/api/health');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.ok) {
+          saveConnection(true);
+        }
+      }
+    } catch (_) {}
+    loadSessions();
+    initCredentialsForm();
+  })();
 })();

@@ -1,0 +1,11 @@
+{
+  "workOrders": [
+    { "id": "WO-101-001", "title": "HVAC filter replacement - Building A", "status": "Open", "priority": "High", "site": "Building A - HQ", "created": "2025-02-20" },
+    { "id": "WO-101-002", "title": "Light fixture repair - Floor 2", "status": "Open", "priority": "Medium", "site": "Building A - HQ", "created": "2025-02-21" },
+    { "id": "WO-102-001", "title": "Plumbing leak - Restroom 2B", "status": "In Progress", "priority": "High", "site": "Building B - Operations", "created": "2025-02-22" },
+    { "id": "WO-101-003", "title": "Elevator annual inspection", "status": "Open", "priority": "Medium", "site": "Building A - HQ", "created": "2025-02-23" },
+    { "id": "WO-101-004", "title": "Fire alarm test - Building A", "status": "Completed", "priority": "Low", "site": "Building A - HQ", "created": "2025-02-18" },
+    { "id": "WO-103-001", "title": "HVAC filter replacement - Warehouse", "status": "Completed", "priority": "Medium", "site": "Warehouse East", "created": "2025-02-19" },
+    { "id": "WO-102-002", "title": "Chiller maintenance - Quarterly", "status": "On Hold", "priority": "Medium", "site": "Building B - Operations", "created": "2025-02-24" }
+  ]
+}

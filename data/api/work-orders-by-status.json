@@ -1,0 +1,8 @@
+{
+  "byStatus": [
+    { "status": "Open", "count": 3 },
+    { "status": "In Progress", "count": 1 },
+    { "status": "Completed", "count": 2 },
+    { "status": "On Hold", "count": 1 }
+  ]
+}

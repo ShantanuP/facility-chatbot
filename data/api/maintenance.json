@@ -1,0 +1,7 @@
+{
+  "upcoming": [
+    { "asset": "HVAC Filter Replacement - Bldg A", "date": "2025-03-01", "type": "HVAC" },
+    { "asset": "Elevator Annual Inspection", "date": "2025-03-05", "type": "Elevator" },
+    { "asset": "Chiller Quarterly Maintenance", "date": "2025-03-10", "type": "HVAC" }
+  ]
+}

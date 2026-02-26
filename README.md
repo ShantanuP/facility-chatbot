@@ -1,34 +1,50 @@
 # Facility Manager Chatbot
 
-A facility-manager web app with a chatbot that answers questions using **Corrigo**-style data (work orders, assets, locations, maintenance). When not connected to Corrigo, the app asks for credentials; once “connected,” it uses simulated data and can draw charts and suggest follow-up questions.
+A facility-manager web app with a chatbot that answers questions using **Corrigo** data. The chatbot reads from **sample data** in a local SQLite database (`data/corrigo.db`) when you run the included API server.
 
 ## Features
 
-- **Left sidebar**: User profile (with Corrigo connection status) and chat history
+- **Left sidebar**: User profile (connection status) and chat history
 - **Main area**: Three suggested prompts above the chat; chat window below
-- **Intent detection**: Classifies questions (work orders, assets by cost, status breakdown, locations, maintenance) to decide what data to fetch
-- **Corrigo flow**: If the question needs Corrigo data and the app is not connected, a credentials modal is shown
-- **Responses**: Describes results in plain language, optionally draws a chart (e.g. work orders by status, top assets by cost)
-- **Follow-up prompts**: After each answer, suggests 3 clickable follow-up questions
+- **Intent detection**: Classifies questions (work orders, assets by cost, status breakdown, locations, maintenance) and fetches the right data
+- **Sample data**: When the server is running, answers are based on the tables and sample data in `data/corrigo.db` (from the Corrigo CD/ReactBI schema)
+- **Charts**: Work orders by status and top assets by cost are shown with bar charts
+- **Follow-up prompts**: After each answer, suggests clickable follow-up questions
 
-## Run locally
+## Run with sample data (no npm install)
 
-Open `index.html` in a browser, or serve the folder with any static server:
+The server uses **only Node.js built-ins**—no `npm install` and no external packages (avoids certificate or registry issues).
 
-```bash
-cd facility-chatbot
-npx serve .
-# or: python3 -m http.server 8080
-```
+1. **Start the server**:
 
-Then open the URL shown (e.g. http://localhost:3000).
+   ```bash
+   cd facility-chatbot
+   node server.js
+   ```
 
-## Connecting to Corrigo
+   Or: `npm start` (same as `node server.js`).
 
-The UI includes a “Connect to Corrigo” modal (username, password, region). This is a **simulated** connection: submitting the form sets the app as “connected” and stores a preference in `localStorage`. Data is generated locally. To use the real Corrigo API, replace the `fetchCorrigoData` logic in `app.js` with calls to the [Corrigo Developer API](https://developer.corrigopro.com/).
+2. Open **http://localhost:3001** in your browser.
+
+The chatbot will show "Connected" and answer questions using the sample data. If you open the app without the server (e.g. by opening `index.html` directly), it will ask you to start the server.
+
+## Data and API
+
+- **Sample data**: Pre-built JSON in `data/api/` (e.g. `work-orders.json`, `assets-by-cost.json`) matches the Corrigo-style sample data. The server serves these at `/api/work-orders`, `/api/work-orders-by-status`, `/api/assets`, `/api/assets-by-cost`, `/api/locations`, `/api/maintenance`, and `/api/health`.
+- **SQL schema/data** (optional): `data/corrigo_schema.sql` and `data/corrigo_sample_data.sql` are the original table definitions and sample rows; the app does not use them at runtime. You can load them into SQLite for other tools if needed.
 
 ## Files
 
-- `index.html` – Layout: sidebar (profile, chat history), main (prompts + chat), credentials modal
-- `styles.css` – Dark theme and layout
-- `app.js` – Intent detection, connection state, simulated Corrigo data, response building, Chart.js rendering, follow-up chips
+| File | Description |
+|------|-------------|
+| `index.html` | Layout: sidebar, prompts, chat, credentials modal |
+| `styles.css` | Dark theme and layout |
+| `app.js` | Intent detection, API calls, response text, charts, follow-ups |
+| `server.js` | Node server (no deps); serves app and `data/api/*.json` |
+| `data/api/*.json` | Sample data for work orders, assets, locations, maintenance |
+| `data/corrigo_schema.sql` | SQL schema (optional reference) |
+| `data/corrigo_sample_data.sql` | Sample rows (optional reference) |
+
+## Connecting to live Corrigo
+
+The UI includes a "Connect to Corrigo" modal. Submitting it sets the app as "connected" and uses the same API (sample data when the server is running). To use the real Corrigo API instead, replace the `fetchCorrigoData` logic in `app.js` with calls to the [Corrigo Developer API](https://developer.corrigopro.com/).

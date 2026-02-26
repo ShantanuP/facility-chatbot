@@ -1,0 +1,9 @@
+{
+  "assets": [
+    { "id": "AST-701", "name": "HVAC Unit - Building A Roof", "type": "HVAC", "location": "Building A - HQ" },
+    { "id": "AST-702", "name": "Elevator System - Tower", "type": "Elevator", "location": "Building A - HQ" },
+    { "id": "AST-703", "name": "Roof - Building B", "type": "Structure", "location": "Building B - Operations" },
+    { "id": "AST-704", "name": "Generator - Basement", "type": "Electrical", "location": "Building A - HQ" },
+    { "id": "AST-705", "name": "Chiller Plant", "type": "HVAC", "location": "Building B - Operations" }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "locations": [
+    { "id": "LOC-101", "name": "Building A - HQ", "address": "100 Main Street", "workOrderCount": 4 },
+    { "id": "LOC-102", "name": "Building B - Operations", "address": "200 Oak Avenue", "workOrderCount": 2 },
+    { "id": "LOC-103", "name": "Warehouse East", "address": "150 Industrial Blvd", "workOrderCount": 1 }
+  ]
+}

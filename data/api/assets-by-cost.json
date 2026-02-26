@@ -1,0 +1,9 @@
+{
+  "assets": [
+    { "id": "AST-701", "name": "HVAC Unit - Building A Roof", "cost": 12500 },
+    { "id": "AST-702", "name": "Elevator System - Tower", "cost": 8200 },
+    { "id": "AST-703", "name": "Roof - Building B", "cost": 6100 },
+    { "id": "AST-704", "name": "Generator - Basement", "cost": 4800 },
+    { "id": "AST-705", "name": "Chiller Plant", "cost": 4200 }
+  ]
+}

@@ -158,15 +158,41 @@
     }
   }
 
-  function connectWithCredentials(username, password, region) {
+  async function connectWithCredentials(serverHostname, httpPath, accessToken) {
+    try {
+      const res = await fetch(API_BASE + '/api/databricks-connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serverHostname: serverHostname.trim(),
+          httpPath: httpPath.trim(),
+          accessToken: accessToken.trim(),
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        console.warn('Databricks connect failed', json.error || res.statusText);
+        return false;
+      }
+    } catch (err) {
+      console.warn('Databricks connect error', err);
+      return false;
+    }
     saveConnection(true);
     try {
       localStorage.setItem(
         CREDENTIALS_KEY,
-        JSON.stringify({ username, region })
+        JSON.stringify({
+          serverHostname: serverHostname.trim(),
+          httpPath: httpPath.trim(),
+          accessToken: accessToken.trim(),
+        })
       );
+      const displayName = serverHostname.replace(/^https?:\/\//, '').split('/')[0];
+      if (elements.profileName) elements.profileName.textContent = displayName;
     } catch (_) {}
     hideCredentialsModal();
+    return true;
   }
 
   // ----- Corrigo data: fetch from local API (sample data in corrigo.db) -----
@@ -545,17 +571,19 @@
     }
   }
 
-  // ----- Credentials form -----
+  // ----- Credentials form (Databricks) -----
   function initCredentialsForm() {
     if (!elements.credentialsForm) return;
-    elements.credentialsForm.addEventListener('submit', (e) => {
+    elements.credentialsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const user = document.getElementById('corrigoUsername')?.value?.trim();
-      const pass = document.getElementById('corrigoPassword')?.value;
-      const region = document.getElementById('corrigoRegion')?.value?.trim() || 'US';
-      if (user && pass) {
-        connectWithCredentials(user, pass, region);
-        if (elements.profileName) elements.profileName.textContent = user;
+      const host = document.getElementById('databricksHost')?.value?.trim();
+      const path = document.getElementById('databricksPath')?.value?.trim();
+      const token = document.getElementById('databricksToken')?.value;
+      if (host && path && token) {
+        const ok = await connectWithCredentials(host, path, token);
+        if (!ok) {
+          appendMessage('bot', 'Could not connect to Databricks. Check server hostname, HTTP path, and access token. Make sure the app is running from the server (node server.js).', { followUps: ['Show open work orders', 'Work orders by status'] });
+        }
       }
     });
   }
@@ -594,10 +622,23 @@
     elements.newChatBtn.addEventListener('click', newChat);
   }
 
-  // ----- Init: auto-connect if sample data API is available -----
+  // ----- Init: auto-connect to server; restore Databricks creds if saved -----
   (async function tryDataServer() {
     loadConnectionState();
     if (state.connected) {
+      try {
+        const saved = localStorage.getItem(CREDENTIALS_KEY);
+        if (saved) {
+          const creds = JSON.parse(saved);
+          if (creds.serverHostname && creds.httpPath && creds.accessToken) {
+            await fetch(API_BASE + '/api/databricks-connect', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(creds),
+            });
+          }
+        }
+      } catch (_) {}
       loadSessions();
       initCredentialsForm();
       return;
@@ -606,8 +647,20 @@
       const res = await fetch(API_BASE + '/api/health');
       if (res.ok) {
         const json = await res.json();
-        if (json.ok) {
-          saveConnection(true);
+        if (json.ok) saveConnection(true);
+      }
+    } catch (_) {}
+    try {
+      const saved = localStorage.getItem(CREDENTIALS_KEY);
+      if (saved) {
+        const creds = JSON.parse(saved);
+        if (creds.serverHostname && creds.httpPath && creds.accessToken) {
+          const r = await fetch(API_BASE + '/api/databricks-connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(creds),
+          });
+          if (r.ok && (await r.json()).ok) saveConnection(true);
         }
       }
     } catch (_) {}

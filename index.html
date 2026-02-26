@@ -84,26 +84,26 @@
     </main>
   </div>
 
-  <!-- Credentials modal -->
+  <!-- Credentials modal: Databricks -->
   <div class="modal-overlay" id="credentialsModal" hidden>
     <div class="modal">
       <div class="modal-header">
-        <h2>Connect to Corrigo</h2>
+        <h2>Connect to Databricks</h2>
         <button type="button" class="btn-close-modal" id="closeCredentialsBtn" aria-label="Close">×</button>
       </div>
-      <p class="modal-description">Enter your Corrigo credentials to fetch work orders, assets, and other facility data.</p>
+      <p class="modal-description">Enter your Databricks SQL warehouse connection details to fetch work orders, assets, and facility data.</p>
       <form id="credentialsForm" class="credentials-form">
         <label>
-          <span>Username / Email</span>
-          <input type="text" id="corrigoUsername" placeholder="your@email.com" required />
+          <span>Server hostname</span>
+          <input type="text" id="databricksHost" placeholder="adb-xxxx.azuredatabricks.net" required />
         </label>
         <label>
-          <span>Password</span>
-          <input type="password" id="corrigoPassword" placeholder="••••••••" required />
+          <span>HTTP path</span>
+          <input type="text" id="databricksPath" placeholder="/sql/1.0/warehouses/xxxxx" required />
         </label>
         <label>
-          <span>Region (e.g. US, APAC)</span>
-          <input type="text" id="corrigoRegion" placeholder="US" value="US" />
+          <span>Access token</span>
+          <input type="password" id="databricksToken" placeholder="dapi..." required />
         </label>
         <div class="modal-actions">
           <button type="button" class="btn-secondary" id="cancelCredentialsBtn">Cancel</button>

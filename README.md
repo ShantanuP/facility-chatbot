@@ -45,6 +45,21 @@ The chatbot will show "Connected" and answer questions using the sample data. If
 | `data/corrigo_schema.sql` | SQL schema (optional reference) |
 | `data/corrigo_sample_data.sql` | Sample rows (optional reference) |
 
-## Connecting to live Corrigo
+## Connecting to Databricks (command line or .env)
 
-The UI includes a "Connect to Corrigo" modal. Submitting it sets the app as "connected" and uses the same API (sample data when the server is running). To use the real Corrigo API instead, replace the `fetchCorrigoData` logic in `app.js` with calls to the [Corrigo Developer API](https://developer.corrigopro.com/).
+Set the connection from the **command line** (no browser):
+
+```bash
+cd facility-chatbot
+SERVER_HOSTNAME=adb-xxxx.azuredatabricks.net HTTP_PATH=/sql/1.0/warehouses/xxxxx ACCESS_TOKEN=dapi... node server.js
+```
+
+Or create a **.env** file in the project folder with `SERVER_HOSTNAME`, `HTTP_PATH`, and `ACCESS_TOKEN` (one per line), then run `node server.js`. Do not commit `.env`; it is in `.gitignore`.
+
+**Parameters:**
+
+1. **Server hostname** – Your Databricks workspace host (e.g. `adb-xxxx.azuredatabricks.net` or `your-workspace.cloud.databricks.com`).
+2. **HTTP path** – SQL warehouse path (e.g. `/sql/1.0/warehouses/<warehouse_id>` from the JDBC/ODBC settings).
+3. **Access token** – Databricks personal access token.
+
+The server then runs SQL against your Databricks SQL warehouse for work orders, assets, locations, and maintenance. Table and column names are expected to match the Corrigo-style schema (`workorders`, `assets`, `properties`, `pmrm_schedules`, etc.). Edit `DATABRICKS_QUERIES` in `server.js` if your schema differs. When using env or .env, no browser input is needed. Credentials are stored in the server’s memory and in the browser’s localStorage so they can be restored after a refresh or server restart.
